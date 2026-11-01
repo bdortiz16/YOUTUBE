@@ -10,7 +10,7 @@ const SCHEMA = {
   properties: {
     titulo: { type: "string", description: "Título < 60 caracteres, intrigante, sin clickbait engañoso" },
     narracion: { type: "string", description: "Texto completo a narrar, 120-150 palabras" },
-    escenas: { type: "array", items: { type: "string" }, description: "5-7 descripciones visuales, una por momento" },
+    escenas: { type: "array", items: { type: "string" }, description: "6 descripciones visuales EN INGLÉS para un generador de imágenes, una por momento de la historia, en orden. Concretas (lugar, encuadre, luz, qué se ve), mismo personaje y ambientación en todas, sin texto en pantalla, sin gore" },
     descripcion: { type: "string" },
     tags: { type: "array", items: { type: "string" } },
     textoMiniatura: { type: "string", description: "2-4 palabras en mayúsculas para la portada" },
@@ -33,7 +33,7 @@ export async function run(idea, notasGerente = "") {
     const g = {
       titulo: idea.gancho.length < 60 ? idea.gancho : idea.tema,
       narracion,
-      escenas: ["Pasillo oscuro", "Luz parpadeante", "Silueta al fondo", "Primer plano de una nota", "Pantalla negra"],
+      escenas: ["empty dark hallway at night, flickering light", "close-up of a hand on an old door handle", "shadowy silhouette at the end of a corridor", "old handwritten note taped to a window", "dark window with something pale behind the glass", "pitch black room, faint eyes"],
       descripcion: `${idea.gancho}\nHistoria de ficción original. Sígueme para una nueva cada noche. #terror #historiasdeterror #shorts`,
       tags: ["terror", "historias de terror", "creepypasta", "shorts", "miedo"],
       textoMiniatura: { "Reglas de un trabajo nocturno": "NO CONTESTES", "Mensajes de un número desconocido": "ERA MI NÚMERO", "Grabaciones de cámara de seguridad": "¿QUÉ HAY AHÍ?" }[idea.tema] || "CIERRA LA VENTANA",

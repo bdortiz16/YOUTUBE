@@ -14,7 +14,7 @@ Tesorería ─► Tendencias ─► Gerente ─► Guion ─► Gerente (revisa)
 | 1 | Tendencias | Busca en la web qué temas de terror están pegando | Claude + búsqueda web |
 | 2 | Guion | Escribe una historia original de 45-55 s con gancho y giro final | Claude |
 | 3 | Voz | Narra el guion | ElevenLabs |
-| 4 | Animación | Monta el Short vertical 1080×1920 con subtítulos grandes, ruido y viñeta | ffmpeg |
+| 4 | Animación | Pide una imagen o clip por escena y monta el Short vertical 1080×1920 con fundidos, subtítulos, ruido y viñeta | **Higgsfield** o **fal.ai** + ffmpeg |
 | 5 | Miniaturas | Portada 1280×720 con texto de impacto | ffmpeg |
 | 6 | Subida | Publica en YouTube (marca `containsSyntheticMedia`) | YouTube Data API v3 |
 | 7 | Datos | Lee vistas, likes, subs, retención e ingresos reales | YouTube Data + Analytics API |
@@ -45,6 +45,23 @@ npm start
 - **ElevenLabs**: `ELEVENLABS_API_KEY` + `ELEVENLABS_VOICE_ID` (elige una voz grave en español).
 - **YouTube**: en Google Cloud crea un proyecto, habilita *YouTube Data API v3* y *YouTube Analytics API*, crea credenciales OAuth tipo *App de escritorio* y ejecuta `npm run auth:youtube`.
 - **Fondos**: mete imágenes oscuras propias o con licencia en `assets/fondos/` y la animación les hará zoom lento (Ken Burns). Sin imágenes usa un degradado animado.
+
+## Visuales profesionales (Higgsfield / fal.ai)
+
+El Guion escribe 6 escenas visuales y el agente de Animación se las pide a un generador:
+
+| Proveedor | Variable | Qué usa | Costo aprox. por Short (6 escenas) |
+|-----------|----------|---------|------------------------------------|
+| Higgsfield | `HF_CREDENTIALS=KEY_ID:KEY_SECRET` | Flux Kontext (imagen) + DoP (imagen→video) | según tus créditos |
+| fal.ai | `FAL_KEY` | Flux (imagen) + Kling/Veo/Seedance (video), configurable | ~$0,30 en imágenes · ~$2 en clips |
+
+- `VISUAL_MODO=imagenes`: una imagen por escena con zoom lento. Barato y ya se ve mucho mejor.
+- `VISUAL_MODO=video`: cada imagen se convierte en un clip de 5 s con movimiento. Más profesional y unas 6 veces más caro.
+- Si un clip falla, esa escena se monta como imagen; si la imagen falla, la escena se omite. Sin proveedor configurado, se usa `assets/fondos/` o el degradado.
+- La miniatura usa la primera escena como fondo.
+- La Tesorería suma estos costos y respeta `GASTO_MAX_DIARIO_USD`.
+
+Los modelos se pueden cambiar en `.env` (`HF_MODELO_*`, `FAL_MODELO_*`) sin tocar código.
 
 ## Seguridad por defecto
 

@@ -49,7 +49,10 @@ export async function producir() {
     tesoreria.gasto("Voz IA", a.costo);
     Object.assign(v, { audio: a.audio, segundos: a.segundos, paso: "animacion" }); actualizar(v);
 
-    const an = await animacion.run(v);
+    const vis = await animacion.prepararEscenas(v);
+    tesoreria.gasto("Visuales IA", vis.costo);
+    v.escenasIA = vis.escenas;
+    const an = await animacion.run(v, vis.escenas);
     v.archivo = an.archivo; v.paso = "miniaturas"; actualizar(v);
 
     const m = await miniaturas.run(v);
