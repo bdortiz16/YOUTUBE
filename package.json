@@ -1,0 +1,16 @@
+{
+  "name": "hora-muerta-studio",
+  "version": "0.1.0",
+  "description": "Fábrica automática de Shorts de terror con 9 agentes de IA",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "demo": "MODO_DEMO=1 node server.js",
+    "auth:youtube": "node scripts/youtube-auth.js"
+  },
+  "engines": { "node": ">=20" },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.3.0"
+  }
+}

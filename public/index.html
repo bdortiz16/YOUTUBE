@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Hora Muerta Studio</title>
+  <meta name="theme-color" content="#0b0d24" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <main class="app">
+    <!-- ───────────── LA OFICINA ───────────── -->
+    <section class="oficina" aria-label="Oficina de agentes">
+      <div class="pared">
+        <div class="reloj" aria-label="Reloj">
+          <span class="aguja h"></span><span class="aguja m"></span><span class="aguja s"></span><span class="centro"></span>
+        </div>
+        <div class="neon">
+          <svg class="logo" viewBox="0 0 64 64" aria-hidden="true">
+            <rect x="4" y="12" width="56" height="40" rx="12" fill="none" stroke="currentColor" stroke-width="4"/>
+            <path d="M26 22 L44 32 L26 42 Z" fill="currentColor"/>
+          </svg>
+          <div>
+            <div class="marca">HORA MUERTA</div>
+            <div class="lema">studio · 3:33 a.m.</div>
+          </div>
+        </div>
+        <div class="ventana" aria-hidden="true"><span></span><span></span><span></span><span class="luna"></span></div>
+      </div>
+
+      <div class="piso">
+        <div class="cubiculos" id="cubiculos"></div>
+
+        <div class="zona-cafe" aria-hidden="true">
+          <div class="cafetera"><span class="led"></span><span class="taza"></span></div>
+          <div class="garrafon"></div>
+        </div>
+
+        <div class="cinta" aria-label="Cinta de videos terminados">
+          <div class="cinta-track" id="cinta"></div>
+          <div class="cinta-patas"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+        </div>
+        <div class="toast" id="toast"><span class="play">▶</span> +1 vídeo</div>
+      </div>
+    </section>
+
+    <!-- ───────────── PANEL DE CONTROL ───────────── -->
+    <aside class="panel">
+      <div class="controles">
+        <button id="btnProducir" class="btn primario">▶ Producir 1 video</button>
+        <label class="switch"><input type="checkbox" id="chkAuto" /><span class="slider"></span> Piloto automático</label>
+      </div>
+      <div class="aviso-demo" id="avisoDemo" hidden>Modo demo: los agentes simulan su trabajo. Añade tus claves en <code>.env</code> para producir de verdad.</div>
+
+      <div class="kpis" id="kpis"></div>
+
+      <div class="tarjeta">
+        <h3>Camino a la monetización (YPP)</h3>
+        <div class="meta"><span>Suscriptores</span><b id="yppSubs">0 / 1.000</b></div>
+        <div class="barra"><i id="barSubs"></i></div>
+        <div class="meta"><span>Vistas de Shorts (90 días)</span><b id="yppVistas">0 / 10 M</b></div>
+        <div class="barra"><i id="barVistas"></i></div>
+      </div>
+
+      <div class="tarjeta" id="tarjetaPendientes" hidden>
+        <h3>⏳ Esperan tu aprobación</h3>
+        <div id="pendientes"></div>
+      </div>
+
+      <div class="tarjeta">
+        <h3>Videos</h3>
+        <div id="videos" class="lista-videos"></div>
+      </div>
+
+      <div class="tarjeta">
+        <h3>Bitácora de la oficina</h3>
+        <div id="log" class="log"></div>
+      </div>
+    </aside>
+  </main>
+
+  <dialog id="visor">
+    <video id="visorVideo" controls playsinline></video>
+    <form method="dialog"><button class="btn">Cerrar</button></form>
+  </dialog>
+
+  <script src="/app.js"></script>
+</body>
+</html>
