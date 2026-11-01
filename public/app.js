@@ -1,5 +1,6 @@
 // HORA MUERTA STUDIO — oficina en vivo
 const $ = (s) => document.querySelector(s);
+const esc = (t) => String(t ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
 const estado = { agentes: {}, videos: [], finanzas: null, canal: null, runtime: {} };
 
 const PANTALLA = {
@@ -118,7 +119,7 @@ function pintarVideos() {
     ? lista.map((v) => `
       <div class="fila-video" data-ver="${v.video || ""}" title="${v.error || ""}">
         ${v.mini ? `<img src="${v.mini}" alt="">` : `<div class="ph"></div>`}
-        <div class="t">${v.guion?.titulo || v.idea?.tema || "Buscando idea…"}${v.metricas ? ` · 👁 ${fmt(v.metricas.vistas)}` : ""}${v.url ? ` · <a href="${v.url}" target="_blank" rel="noopener">abrir</a>` : ""}</div>
+        <div class="t">${esc(v.guion?.titulo || v.idea?.tema || "Buscando idea…")}<small class="sub" style="display:block">${v.revision ? `<span class="nota" title="Nota del gancho según el Gerente">🪝 ${v.revision.gancho}/10</span> ` : ""}${v.metricas ? `👁 ${fmt(v.metricas.vistas)}` : ""}${v.metricas?.retencion ? ` · ⏱ ${Math.round(v.metricas.retencion)}% retención` : ""}${v.url ? ` · <a href="${v.url}" target="_blank" rel="noopener">abrir</a>` : ""}</small></div>
         <span class="estado ${v.estado}">${v.estado === "produciendo" ? "⚙ " + (v.paso || "") : ETQ[v.estado] || v.estado}</span>
       </div>`).join("")
     : `<small style="color:var(--tenue)">Aún no hay videos. Pulsa “Producir 1 video”.</small>`;
@@ -174,6 +175,19 @@ function pintarRuntime(r) {
   $("#btnProducir").textContent = r.produciendo ? "⚙ Produciendo…" : "▶ Producir 1 video";
 }
 
+// ── Radar de virales ──
+function pintarVirales(v) {
+  if (!v) return;
+  $("#viralesHora").textContent = "· " + new Date(v.actualizado).toLocaleTimeString("es", { hour: "2-digit", minute: "2-digit" });
+  $("#patrones").innerHTML = (v.patrones || []).map((p) => `<span class="patron" title="${esc(p.porque)} — ej.: ${esc(p.ejemplo)}">${esc(p.patron)}</span>`).join("");
+  $("#virales").innerHTML = v.lista.map((x, i) => `
+    <div class="viral">
+      <span class="pos">${i + 1}</span>
+      <a class="t" ${x.url ? `href="${x.url}" target="_blank" rel="noopener"` : ""}>${esc(x.titulo)}<small>${esc(x.canal)} · ${fmt(x.vistas)} vistas · ${x.segundos}s</small></a>
+      <span class="vel">${fmt(x.vistasPorHora)}/h</span>
+    </div>`).join("") || `<small class="sub">Sin datos del radar.</small>`;
+}
+
 // ── Eventos en vivo ──
 function conectar() {
   const es = new EventSource("/events");
@@ -187,6 +201,7 @@ function conectar() {
       pintarFinanzas(datos.finanzas);
       pintarCanal(datos.canal);
       pintarRuntime(datos.runtime);
+      pintarVirales(datos.virales);
       $("#log").innerHTML = "";
       datos.log.forEach(agregarLog);
       $("#avisoDemo").hidden = !Object.values(datos.agentes).some((a) => a.modo === "demo");
@@ -199,6 +214,7 @@ function conectar() {
     if (tipo === "finanzas") pintarFinanzas(datos);
     if (tipo === "canal") pintarCanal(datos);
     if (tipo === "runtime") pintarRuntime(datos);
+    if (tipo === "virales") pintarVirales(datos);
   };
   es.onerror = () => { es.close(); setTimeout(conectar, 2000); };
 }

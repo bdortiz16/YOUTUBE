@@ -33,14 +33,15 @@ export async function producir() {
     v.idea = e.idea; v.paso = "guion"; actualizar(v);
 
     let notas = "";
-    for (let intento = 1; intento <= 2; intento++) {
-      const g = await guion.run(v.idea, notas);
+    for (let intento = 1; intento <= 3; intento++) {
+      const g = await guion.run(v.idea, notas, datos.aprendizajes());
       tesoreria.gasto("Claude · guion", g.costo);
       const r = await gerente.revisar(g.guion);
       tesoreria.gasto("Claude · revisión", r.costo);
       v.guion = g.guion;
+      v.revision = r.puntuacion;
       if (r.aprobado) break;
-      if (intento === 2) throw new Error("El gerente rechazó el guion dos veces; se descarta");
+      if (intento === 3) throw new Error("El gerente rechazó el guion tres veces; se descarta");
       notas = r.notas;
     }
     v.paso = "voz"; actualizar(v);

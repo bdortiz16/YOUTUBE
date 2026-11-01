@@ -11,12 +11,12 @@ const t = (s) => {
 };
 
 /** Subtítulos estilo Shorts: bloques de 3-4 palabras, centrados, grandes. */
-function subtitulosASS(texto, segundos) {
+function subtitulosASS(texto, segundos, textoGancho = "") {
   const palabras = texto.split(/\s+/).filter(Boolean);
   const bloques = [];
   for (let i = 0; i < palabras.length; i += 3) bloques.push(palabras.slice(i, i + 3).join(" "));
   const totalChars = bloques.reduce((s, b) => s + b.length + 4, 0);
-  let cursor = 0.15;
+  let cursor = 0.05;
   const eventos = bloques.map((b) => {
     const dur = ((b.length + 4) / totalChars) * (segundos - 0.3);
     const linea = `Dialogue: 0,${t(cursor)},${t(cursor + dur)},Story,,0,0,0,,{\\fad(60,60)}${b.toUpperCase().replace(/[{}]/g, "")}`;
@@ -30,11 +30,12 @@ PlayResY: 1920
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Gancho,DejaVu Sans,118,&H004DE1FF,&H000000FF,&H00000000,&H96000000,-1,0,0,0,100,100,0,0,1,9,4,8,70,70,250,1
 Style: Story,DejaVu Sans,92,&H00FFFFFF,&H000000FF,&H00000000,&H96000000,-1,0,0,0,100,100,0,0,1,7,3,5,60,60,0,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
-${eventos.join("\n")}
+${textoGancho ? `Dialogue: 1,${t(0)},${t(2.2)},Gancho,,0,0,0,,{\\fscx130\\fscy130\\t(0,180,\\fscx100\\fscy100)\\fad(0,200)}${textoGancho.toUpperCase().replace(/[{}]/g, "")}\n` : ""}${eventos.join("\n")}
 `;
 }
 
@@ -69,7 +70,7 @@ export async function run(video, escenas = []) {
 
   const D = Math.min(59, video.segundos + 0.8);
   const ass = path.join(cfg.dirSalida, `${video.id}.ass`);
-  fs.writeFileSync(ass, subtitulosASS(video.guion.narracion, video.segundos));
+  fs.writeFileSync(ass, subtitulosASS(video.guion.narracion, video.segundos, video.guion.textoGancho));
   const salida = path.join(cfg.dirSalida, `${video.id}.mp4`);
   const frames = Math.ceil(D * 30);
 

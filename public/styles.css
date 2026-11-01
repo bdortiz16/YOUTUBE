@@ -180,6 +180,16 @@ code { background: #0006; padding: 1px 5px; border-radius: 4px; }
 .toast.ver { transform: translateX(0); }
 
 /* ───────── Panel ───────── */
+.sub { color: var(--tenue); font-weight: 500; font-size: 11px; }
+.patrones { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.patron { background: #ff3b5c22; border: 1px solid #ff3b5c55; color: #ffc2cc; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 20px; cursor: help; }
+.lista-virales { display: flex; flex-direction: column; gap: 6px; max-height: 260px; overflow: auto; }
+.viral { display: grid; grid-template-columns: 22px 1fr auto; gap: 8px; align-items: center; font-size: 12px; }
+.viral .pos { font-weight: 900; color: var(--amarillo); text-align: center; }
+.viral .t { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--texto); text-decoration: none; }
+.viral .t small { display: block; color: var(--tenue); font-size: 10px; }
+.viral .vel { font-weight: 800; color: #ff8a9c; font-size: 11px; white-space: nowrap; }
+.nota { font-size: 10px; font-weight: 800; padding: 1px 5px; border-radius: 5px; background: #ffd84d22; color: var(--amarillo); margin-left: 4px; }
 .panel { display: flex; flex-direction: column; gap: 14px; }
 .controles { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
 .btn { border: 0; border-radius: 12px; padding: 12px 16px; font-weight: 800; font-size: 15px; cursor: pointer; background: var(--panel-2); color: var(--texto); }
@@ -219,8 +229,8 @@ code { background: #0006; padding: 1px 5px; border-radius: 4px; }
 .lista-videos { display: flex; flex-direction: column; gap: 6px; max-height: 260px; overflow: auto; }
 .fila-video { display: grid; grid-template-columns: 48px 1fr auto; gap: 8px; align-items: center; font-size: 12px; padding: 4px; border-radius: 8px; cursor: pointer; }
 .fila-video:hover { background: var(--panel-2); }
-.fila-video img, .fila-video .ph { width: 48px; height: 27px; object-fit: cover; border-radius: 4px; background: #000; }
-.fila-video .t { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fila-video img, .fila-video .ph { width: 48px; height: 27px; align-self: center; object-fit: cover; border-radius: 4px; background: #000; }
+.fila-video .t { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 .estado { font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 6px; background: #ffffff1a; white-space: nowrap; }
 .estado.publicado { background: #39d98a33; color: var(--verde); }
 .estado.pendiente { background: #ffd84d33; color: var(--amarillo); }

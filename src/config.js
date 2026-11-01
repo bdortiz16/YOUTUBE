@@ -23,6 +23,8 @@ export const cfg = {
   claude: !demo && !!e.ANTHROPIC_API_KEY,
   eleven: !demo && !!e.ELEVENLABS_API_KEY && !!e.ELEVENLABS_VOICE_ID,
   youtube: !demo && !!e.YT_CLIENT_ID && !!e.YT_CLIENT_SECRET && !!e.YT_REFRESH_TOKEN,
+  // Para buscar virales basta una API key simple (o el OAuth de arriba)
+  youtubeBusqueda: !demo && (!!e.YT_API_KEY || (!!e.YT_CLIENT_ID && !!e.YT_CLIENT_SECRET && !!e.YT_REFRESH_TOKEN)),
   elevenVoz: e.ELEVENLABS_VOICE_ID,
   elevenUsdPor1k: num(e.ELEVENLABS_USD_POR_1K, 0.3),
   ytPrivacidad: e.YT_PRIVACIDAD || "private",

@@ -1,4 +1,4 @@
-// AGENTE 2 · GUION — escribe una historia original de 45-55 segundos.
+// AGENTE 2 · GUION — escribe una historia original de 45-55 segundos con fórmula de retención.
 import { cfg } from "../config.js";
 import { agente, espera } from "../estado.js";
 import { preguntar } from "../claude.js";
@@ -6,8 +6,15 @@ import { preguntar } from "../claude.js";
 const SCHEMA = {
   type: "object",
   additionalProperties: false,
-  required: ["titulo", "narracion", "escenas", "descripcion", "tags", "textoMiniatura"],
+  required: ["ganchos", "ganchoElegido", "textoGancho", "titulo", "narracion", "escenas", "descripcion", "tags", "textoMiniatura"],
   properties: {
+    ganchos: {
+      type: "array",
+      description: "5 primeras frases alternativas, cada una con una técnica distinta, máx. 12 palabras",
+      items: { type: "object", additionalProperties: false, required: ["texto", "tecnica"], properties: { texto: { type: "string" }, tecnica: { type: "string" } } },
+    },
+    ganchoElegido: { type: "integer", description: "Índice del gancho más fuerte; la narración DEBE empezar exactamente con él" },
+    textoGancho: { type: "string", description: "2-5 palabras en mayúsculas que aparecen grandes en pantalla los primeros 2 segundos (complementa, no repite, la primera frase)" },
     titulo: { type: "string", description: "Título < 60 caracteres, intrigante, sin clickbait engañoso" },
     narracion: { type: "string", description: "Texto completo a narrar, 120-150 palabras" },
     escenas: { type: "array", items: { type: "string" }, description: "6 descripciones visuales EN INGLÉS para un generador de imágenes, una por momento de la historia, en orden. Concretas (lugar, encuadre, luz, qué se ve), mismo personaje y ambientación en todas, sin texto en pantalla, sin gore" },
@@ -22,7 +29,7 @@ const DEMO = {
   default: `Mi abuela cerraba todas las ventanas a las tres y treinta y tres. Todas. Aunque hiciera calor. Decía que a esa hora la noche busca casas abiertas. Yo me reía. Cuando murió, me quedé con su casa. La primera noche dejé una ventana abierta, solo por llevarle la contraria. A las tres y treinta y tres escuché algo arrastrarse por el techo. Despacio. Buscando. Cerré la ventana de golpe. El ruido paró. Respiré. Entonces vi la nota pegada por dentro del vidrio, con la letra de mi abuela: gracias por cerrarla, mijo, llevo años esperando que alguien me deje entrar. La nota estaba del lado de adentro.`,
 };
 
-export async function run(idea, notasGerente = "") {
+export async function run(idea, notasGerente = "", aprendizajes = "") {
   const a = agente("guion");
   a.modo(cfg.claude ? "real" : "demo");
   a.trabajando(`Escribiendo: “${idea.tema}”`, 0.1);
@@ -31,24 +38,41 @@ export async function run(idea, notasGerente = "") {
     for (let p = 0.2; p <= 1; p += 0.1) { await espera(350); a.progreso(p); }
     const narracion = DEMO[idea.tema] || DEMO.default;
     const g = {
-      titulo: idea.gancho.length < 60 ? idea.gancho : idea.tema,
+      ganchos: [{ texto: idea.gancho, tecnica: idea.tecnica || "regla/prohibición" }, { texto: "Nadie en mi familia abre esa puerta.", tecnica: "confesión" }, { texto: "A las 3:33 todo se detuvo.", tecnica: "cuenta regresiva/hora exacta" }],
+      ganchoElegido: 0,
+      textoGancho: "NO LO HAGAS",
+      titulo: idea.tema,
       narracion,
       escenas: ["empty dark hallway at night, flickering light", "close-up of a hand on an old door handle", "shadowy silhouette at the end of a corridor", "old handwritten note taped to a window", "dark window with something pale behind the glass", "pitch black room, faint eyes"],
       descripcion: `${idea.gancho}\nHistoria de ficción original. Sígueme para una nueva cada noche. #terror #historiasdeterror #shorts`,
       tags: ["terror", "historias de terror", "creepypasta", "shorts", "miedo"],
       textoMiniatura: { "Reglas de un trabajo nocturno": "NO CONTESTES", "Mensajes de un número desconocido": "ERA MI NÚMERO", "Grabaciones de cámara de seguridad": "¿QUÉ HAY AHÍ?" }[idea.tema] || "CIERRA LA VENTANA",
     };
-    a.listo(`Guion listo: “${g.titulo}”`);
+    g.tecnica = g.ganchos[0].tecnica;
+    a.listo(`Guion listo: “${g.titulo}” · gancho: ${g.tecnica}`);
     return { guion: g, costo: 0 };
   }
 
   const { datos, costo } = await preguntar({
     schema: SCHEMA,
     esfuerzo: "high",
-    sistema: `Eres el guionista de "${cfg.marca.nombre}", un canal de Shorts de terror en español neutro. Escribes ficción ORIGINAL, narrada en primera persona, con frases cortas para voz en off.
-Reglas: el primer segundo es el gancho; tensión creciente; giro final que obligue a reverlo; 120-150 palabras; nada de gore explícito, nada sobre personas, lugares o crímenes reales, nada dirigido a niños. Cada historia debe sentirse distinta a las anteriores (evita contenido repetitivo).`,
-    prompt: `Tema: ${idea.tema}\nGancho sugerido: ${idea.gancho}\nPor qué funciona: ${idea.porque}${notasGerente ? `\nCorrecciones del gerente: ${notasGerente}` : ""}`,
+    sistema: `Eres el guionista de "${cfg.marca.nombre}", un canal de Shorts de terror en español neutro. Escribes ficción ORIGINAL, en primera persona, con frases cortas para voz en off. Tu métrica es la RETENCIÓN: que nadie deslice y que lo vuelvan a ver.
+
+FÓRMULA (obligatoria):
+• 0-2 s · GANCHO: la primera frase ya está dentro del conflicto. Nada de "hola", "hoy les cuento", nombre del canal ni contexto previo. Crea un bucle abierto (una pregunta que el cerebro necesita cerrar).
+• 2-10 s · CONTEXTO MÍNIMO: quién, dónde, la regla o la anomalía. Una frase o dos.
+• 10-40 s · ESCALADA: cada 5-8 s un detalle nuevo más inquietante que el anterior. Frases de 3-10 palabras. Detalles sensoriales concretos (sonidos, horas exactas, objetos).
+• 40-50 s · GIRO: la revelación recontextualiza todo lo anterior.
+• Última frase · BUCLE: debe conectar con la primera frase para que, al reiniciarse el Short, se sienta como continuación. Esto multiplica las re-vistas.
+
+Además: escribe 5 ganchos alternativos con técnicas distintas, elige el más fuerte y empieza la narración exactamente con él. El título NO repite el gancho: añade otra capa de curiosidad. 120-150 palabras. Sin gore explícito, sin personas/lugares/crímenes reales, nada dirigido a niños. Cada historia debe sentirse distinta a las anteriores.`,
+    prompt: `Tema: ${idea.tema}
+Gancho sugerido por Tendencias: ${idea.gancho} (técnica: ${idea.tecnica || "libre"})
+Patrón viral que aplica: ${idea.porque}
+${aprendizajes ? `Lo que mejor retiene en NUESTRO canal: ${aprendizajes}\n` : ""}${notasGerente ? `Correcciones del gerente (atiéndelas todas): ${notasGerente}` : ""}`,
   });
-  a.listo(`Guion listo: “${datos.titulo}”`);
+  const elegido = datos.ganchos?.[datos.ganchoElegido];
+  datos.tecnica = elegido?.tecnica || idea.tecnica;
+  a.listo(`Guion listo: “${datos.titulo}” · gancho: ${datos.tecnica}`);
   return { guion: datos, costo };
 }

@@ -11,14 +11,14 @@ Tesorería ─► Tendencias ─► Gerente ─► Guion ─► Gerente (revisa)
 
 | # | Agente | Qué hace | Con qué |
 |---|--------|----------|---------|
-| 1 | Tendencias | Busca en la web qué temas de terror están pegando | Claude + búsqueda web |
-| 2 | Guion | Escribe una historia original de 45-55 s con gancho y giro final | Claude |
+| 1 | Tendencias | Radar de virales: Shorts de terror de los últimos 7 días ordenados por vistas/hora; analiza sus patrones de gancho y propone ideas originales | YouTube Data API + Claude + búsqueda web |
+| 2 | Guion | Escribe 5 ganchos, elige el mejor y sigue la fórmula de retención (gancho → escalada → giro → final en bucle) | Claude |
 | 3 | Voz | Narra el guion | ElevenLabs |
 | 4 | Animación | Pide una imagen o clip por escena y monta el Short vertical 1080×1920 con fundidos, subtítulos, ruido y viñeta | **Higgsfield** o **fal.ai** + ffmpeg |
 | 5 | Miniaturas | Portada 1280×720 con texto de impacto | ffmpeg |
 | 6 | Subida | Publica en YouTube (marca `containsSyntheticMedia`) | YouTube Data API v3 |
 | 7 | Datos | Lee vistas, likes, subs, retención e ingresos reales | YouTube Data + Analytics API |
-| 8 | Gerente | Elige la idea según los datos, revisa calidad y políticas, pide reescrituras | Claude |
+| 8 | Gerente | Elige la idea según virales + datos propios; puntúa el guion con una rúbrica viral (gancho ≥ 8/10) y pide reescrituras | Claude |
 | 9 | Tesorería | Presupuesto diario, costo por video, ingresos, ROI | interno |
 
 Cada agente funciona en **modo DEMO** (simulado) si le falta su clave, así que puedes verlo andar desde el primer minuto.
@@ -45,6 +45,28 @@ npm start
 - **ElevenLabs**: `ELEVENLABS_API_KEY` + `ELEVENLABS_VOICE_ID` (elige una voz grave en español).
 - **YouTube**: en Google Cloud crea un proyecto, habilita *YouTube Data API v3* y *YouTube Analytics API*, crea credenciales OAuth tipo *App de escritorio* y ejecuta `npm run auth:youtube`.
 - **Fondos**: mete imágenes oscuras propias o con licencia en `assets/fondos/` y la animación les hará zoom lento (Ken Burns). Sin imágenes usa un degradado animado.
+
+## Fórmula viral
+
+**1. Radar (Tendencias).** Busca en YouTube Shorts de terror en español publicados en los últimos 7 días y los ordena por **vistas por hora**, que mide la velocidad de crecimiento y no solo el total. Claude detecta qué patrones se repiten en los que más crecen (reglas, imposible cotidiano, segunda persona…) y propone ideas **originales** con esos patrones. Nunca copia historias ajenas. Necesita `YT_API_KEY`.
+
+**2. Guion con estructura de retención.**
+
+| Tiempo | Parte | Regla |
+|--------|-------|-------|
+| 0–2 s | Gancho | Entra directo al conflicto y abre una pregunta. Sin "hola" ni intro |
+| 2–10 s | Contexto | Quién, dónde, la regla o la anomalía |
+| 10–40 s | Escalada | Un detalle nuevo e inquietante cada 5–8 s |
+| 40–50 s | Giro | Cambia el sentido de todo |
+| Final | Bucle | La última frase conecta con la primera para que se vuelva a ver |
+
+Además escribe 5 ganchos con técnicas distintas y elige el más fuerte. Durante los primeros 2,2 s aparece un **texto grande en pantalla** que complementa al gancho.
+
+**3. Rúbrica del Gerente.** Puntúa gancho, escalada, giro, bucle, título y originalidad de 0 a 10. Solo aprueba con **gancho ≥ 8** y media ≥ 7. Si no, pide reescribir (hasta 3 intentos).
+
+**4. Aprendizaje (Datos).** Mide la **retención por video** con YouTube Analytics y calcula qué técnicas de gancho retienen más en *tu* canal. Ese aprendizaje vuelve al Gerente y al Guion en cada video.
+
+> Nada garantiza que un video se haga viral. Este sistema sube las probabilidades: ganchos probados, buena retención y aprendizaje continuo.
 
 ## Visuales profesionales (Higgsfield / fal.ai)
 

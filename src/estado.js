@@ -68,7 +68,7 @@ export function agente(id) {
 }
 
 export function snapshot() {
-  return { agentes, videos: db.videos.slice(-40), finanzas: resumenFinanzas(), canal: db.canal, log: log.slice(-80), runtime, marca: cfg.marca, demo: cfg.demo };
+  return { agentes, videos: db.videos.slice(-40), finanzas: resumenFinanzas(), canal: db.canal, virales: db.virales || null, log: log.slice(-80), runtime, marca: cfg.marca, demo: cfg.demo };
 }
 
 export function resumenFinanzas() {
