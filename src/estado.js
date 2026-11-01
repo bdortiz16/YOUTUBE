@@ -10,7 +10,7 @@ bus.setMaxListeners(100);
 export const AGENTES = [
   { id: "tendencias", n: 1, nombre: "Tendencias", rol: "Busca qué temas de terror están pegando" },
   { id: "guion", n: 2, nombre: "Guion", rol: "Escribe la historia (45-55 s) con gancho" },
-  { id: "voz", n: 3, nombre: "Voz", rol: "Narra el guion con voz IA" },
+  { id: "voz", n: 3, nombre: "Voz y Sonido", rol: "Narrador propio, música, efectos y mezcla profesional" },
   { id: "animacion", n: 4, nombre: "Animación", rol: "Monta el video vertical con subtítulos" },
   { id: "miniaturas", n: 5, nombre: "Miniaturas", rol: "Crea la portada" },
   { id: "subida", n: 6, nombre: "Subida", rol: "Publica en YouTube" },

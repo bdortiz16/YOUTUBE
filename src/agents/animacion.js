@@ -10,19 +10,30 @@ const t = (s) => {
   return `${h}:${String(m).padStart(2, "0")}:${x}`;
 };
 
-/** Subtítulos estilo Shorts: bloques de 3-4 palabras, centrados, grandes. */
-function subtitulosASS(texto, segundos, textoGancho = "") {
-  const palabras = texto.split(/\s+/).filter(Boolean);
-  const bloques = [];
-  for (let i = 0; i < palabras.length; i += 3) bloques.push(palabras.slice(i, i + 3).join(" "));
-  const totalChars = bloques.reduce((s, b) => s + b.length + 4, 0);
-  let cursor = 0.05;
-  const eventos = bloques.map((b) => {
-    const dur = ((b.length + 4) / totalChars) * (segundos - 0.3);
-    const linea = `Dialogue: 0,${t(cursor)},${t(cursor + dur)},Story,,0,0,0,,{\\fad(60,60)}${b.toUpperCase().replace(/[{}]/g, "")}`;
-    cursor += dur;
-    return linea;
-  });
+/** Subtítulos estilo Shorts: bloques de 3 palabras, sincronizados con la voz real si hay tiempos por palabra. */
+function subtitulosASS(texto, segundos, textoGancho = "", palabras = null) {
+  const limpio = (w) => w.toUpperCase().replace(/[{}\\]/g, "");
+  let eventos;
+  if (palabras?.length) {
+    eventos = [];
+    for (let i = 0; i < palabras.length; i += 3) {
+      const grupo = palabras.slice(i, i + 3);
+      const ini = grupo[0].ini, fin = palabras[i + 3]?.ini ?? grupo.at(-1).fin + 0.4;
+      eventos.push(`Dialogue: 0,${t(ini)},${t(Math.max(fin, ini + 0.25))},Story,,0,0,0,,{\\fad(40,40)}${limpio(grupo.map((p) => p.texto).join(" "))}`);
+    }
+  } else {
+    const ws = texto.replace(/\[[^\]]*\]/g, " ").split(/\s+/).filter(Boolean);
+    const bloques = [];
+    for (let i = 0; i < ws.length; i += 3) bloques.push(ws.slice(i, i + 3).join(" "));
+    const totalChars = bloques.reduce((s, b) => s + b.length + 4, 0);
+    let cursor = 0.05;
+    eventos = bloques.map((b) => {
+      const dur = ((b.length + 4) / totalChars) * (segundos - 0.3);
+      const linea = `Dialogue: 0,${t(cursor)},${t(cursor + dur)},Story,,0,0,0,,{\\fad(60,60)}${limpio(b)}`;
+      cursor += dur;
+      return linea;
+    });
+  }
   return `[Script Info]
 ScriptType: v4.00+
 PlayResX: 1080
@@ -70,7 +81,7 @@ export async function run(video, escenas = []) {
 
   const D = Math.min(59, video.segundos + 0.8);
   const ass = path.join(cfg.dirSalida, `${video.id}.ass`);
-  fs.writeFileSync(ass, subtitulosASS(video.guion.narracion, video.segundos, video.guion.textoGancho));
+  fs.writeFileSync(ass, subtitulosASS(video.guion.narracion, video.segundos, video.guion.textoGancho, video.palabras));
   const salida = path.join(cfg.dirSalida, `${video.id}.mp4`);
   const frames = Math.ceil(D * 30);
 
@@ -88,17 +99,16 @@ export async function run(video, escenas = []) {
       ? `[0:v]scale=1350:2400:force_original_aspect_ratio=increase,crop=1350:2400,zoompan=z='min(zoom+0.0006,1.18)':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=${frames}:s=1080x1920:fps=30,eq=brightness=-0.12:saturation=0.6`
       : `[0:v]format=yuv420p`;
   }
-  const filtro = `${base},noise=alls=12:allf=t+u,vignette=angle=PI/3.3,eq=brightness='0.025*sin(t*9)*lt(mod(t\\,7)\\,0.6)':eval=frame,subtitles=${ass}[v];[1:a][2:a]amix=inputs=2:duration=longest:weights='1 0.5'[a]`;
+  const filtro = `${base},noise=alls=12:allf=t+u,vignette=angle=PI/3.3,eq=brightness='0.025*sin(t*9)*lt(mod(t\\,7)\\,0.6)':eval=frame,subtitles=${ass}[v]`;
 
   await ffmpeg([
     ...entradaVideo,
     "-i", video.audio,
-    "-f", "lavfi", "-i", `anoisesrc=color=brown:amplitude=0.035:d=${D}`,
     "-filter_complex", filtro,
-    "-map", "[v]", "-map", "[a]",
+    "-map", "[v]", "-map", "1:a",
     "-t", String(D), "-r", "30",
     "-c:v", "libx264", "-preset", "veryfast", "-crf", "21", "-pix_fmt", "yuv420p",
-    "-c:a", "aac", "-b:a", "160k", "-movflags", "+faststart",
+    "-c:a", "copy", "-movflags", "+faststart",
     salida,
   ]);
   a.listo(`Video renderizado (${D.toFixed(0)} s, ${escenas.length ? escenas.length + " escenas IA" : "fondo simple"})`);

@@ -12,7 +12,7 @@ import * as datos from "./agents/datos.js";
 import * as gerente from "./agents/gerente.js";
 import * as tesoreria from "./agents/tesoreria.js";
 
-const publico = (v) => ({ ...v, video: v.archivo && `/media/${path.basename(v.archivo)}`, mini: v.miniatura && `/media/${path.basename(v.miniatura)}`, audio: undefined, archivo: undefined, miniatura: undefined });
+const publico = (v) => ({ ...v, video: v.archivo && `/media/${path.basename(v.archivo)}`, mini: v.miniatura && `/media/${path.basename(v.miniatura)}`, audio: undefined, archivo: undefined, miniatura: undefined, palabras: undefined });
 const actualizar = (v) => { guardar(); emitir("video", publico(v)); };
 export const videosPublicos = () => db.videos.slice(-40).map(publico);
 
@@ -47,8 +47,8 @@ export async function producir() {
     v.paso = "voz"; actualizar(v);
 
     const a = await voz.run(v);
-    tesoreria.gasto("Voz IA", a.costo);
-    Object.assign(v, { audio: a.audio, segundos: a.segundos, paso: "animacion" }); actualizar(v);
+    tesoreria.gasto("Voz, música y efectos", a.costo);
+    Object.assign(v, { audio: a.audio, segundos: a.segundos, palabras: a.palabras, efectosSonido: a.efectos, paso: "animacion" }); actualizar(v);
 
     const vis = await animacion.prepararEscenas(v);
     tesoreria.gasto("Visuales IA", vis.costo);

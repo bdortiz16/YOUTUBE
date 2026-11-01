@@ -13,7 +13,7 @@ Tesorería ─► Tendencias ─► Gerente ─► Guion ─► Gerente (revisa)
 |---|--------|----------|---------|
 | 1 | Tendencias | Radar de virales: Shorts de terror de los últimos 7 días ordenados por vistas/hora; analiza sus patrones de gancho y propone ideas originales | YouTube Data API + Claude + búsqueda web |
 | 2 | Guion | Escribe 5 ganchos, elige el mejor y sigue la fórmula de retención (gancho → escalada → giro → final en bucle) | Claude |
-| 3 | Voz | Narra el guion | ElevenLabs |
+| 3 | Voz y Sonido | Narrador con voz exclusiva y actuación (susurros, pausas), música original, efectos sincronizados y mezcla a -14 LUFS | ElevenLabs + ffmpeg |
 | 4 | Animación | Pide una imagen o clip por escena y monta el Short vertical 1080×1920 con fundidos, subtítulos, ruido y viñeta | **Higgsfield** o **fal.ai** + ffmpeg |
 | 5 | Miniaturas | Portada 1280×720 con texto de impacto | ffmpeg |
 | 6 | Subida | Publica en YouTube (marca `containsSyntheticMedia`) | YouTube Data API v3 |
@@ -67,6 +67,19 @@ Además escribe 5 ganchos con técnicas distintas y elige el más fuerte. Durant
 **4. Aprendizaje (Datos).** Mide la **retención por video** con YouTube Analytics y calcula qué técnicas de gancho retienen más en *tu* canal. Ese aprendizaje vuelve al Gerente y al Guion en cada video.
 
 > Nada garantiza que un video se haga viral. Este sistema sube las probabilidades: ganchos probados, buena retención y aprendizaje continuo.
+
+## Audio profesional
+
+| Capa | Cómo se hace |
+|------|--------------|
+| **Narrador** | Voz **exclusiva del canal** creada con ElevenLabs Voice Design (`npm run voz:disenar` guarda 3 muestras en `output/voz-muestra-*.mp3`). Con `eleven_v3`, el Guion añade etiquetas de actuación como `[whispers]`, `[sighs]` o `[pause]` sin cambiar el texto |
+| **Subtítulos** | Sincronizados con la voz real gracias a los tiempos por carácter que devuelve ElevenLabs |
+| **Música** | Compuesta para cada historia (ElevenLabs Music, instrumental), según el prompt que escribe el Guion. Baja sola cuando habla el narrador (*ducking*) |
+| **Efectos** | 3–5 por video (puertas, pasos, susurros, golpes), cada uno atado a una frase exacta y colocado en su segundo |
+| **Sello sonoro** | Un "logo de audio" de 2 s que se genera una vez y suena al inicio de todos los videos |
+| **Mezcla** | Voz comprimida al frente, estéreo 48 kHz, normalizada en dos pasadas a **-14 LUFS / -1,5 dBTP**, el nivel de referencia de YouTube |
+
+Sin clave de ElevenLabs, la música y los efectos se sintetizan con ffmpeg para que puedas probar el flujo. Suenan básicos; la calidad real llega con la clave.
 
 ## Visuales profesionales (Higgsfield / fal.ai)
 

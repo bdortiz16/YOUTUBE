@@ -6,7 +6,7 @@ import { preguntar } from "../claude.js";
 const SCHEMA = {
   type: "object",
   additionalProperties: false,
-  required: ["ganchos", "ganchoElegido", "textoGancho", "titulo", "narracion", "escenas", "descripcion", "tags", "textoMiniatura"],
+  required: ["ganchos", "ganchoElegido", "textoGancho", "titulo", "narracion", "narracionActuada", "sonido", "escenas", "descripcion", "tags", "textoMiniatura"],
   properties: {
     ganchos: {
       type: "array",
@@ -17,6 +17,31 @@ const SCHEMA = {
     textoGancho: { type: "string", description: "2-5 palabras en mayúsculas que aparecen grandes en pantalla los primeros 2 segundos (complementa, no repite, la primera frase)" },
     titulo: { type: "string", description: "Título < 60 caracteres, intrigante, sin clickbait engañoso" },
     narracion: { type: "string", description: "Texto completo a narrar, 120-150 palabras" },
+    narracionActuada: {
+      type: "string",
+      description: "EXACTAMENTE el mismo texto que narracion, palabra por palabra, pero con etiquetas de actuación en inglés entre corchetes para el narrador IA: [whispers], [sighs], [nervous], [slowly], [pause], [breathing heavily], [scared]. Máx. 1 etiqueta cada 2-3 frases; susurro en el giro final",
+    },
+    sonido: {
+      type: "object",
+      additionalProperties: false,
+      required: ["musica", "efectos"],
+      properties: {
+        musica: { type: "string", description: "Prompt EN INGLÉS para la música de fondo: instrumentos, tempo, atmósfera y cómo evoluciona (ej. 'low cello drone, sparse music box, builds tension, stops before the twist')" },
+        efectos: {
+          type: "array",
+          description: "3-5 efectos de sonido en los momentos clave (no en cada frase)",
+          items: {
+            type: "object",
+            additionalProperties: false,
+            required: ["frase", "descripcion"],
+            properties: {
+              frase: { type: "string", description: "Las 2-3 primeras palabras EXACTAS de la narración donde debe sonar" },
+              descripcion: { type: "string", description: "Efecto EN INGLÉS, concreto y corto: 'old wooden door creaking open slowly', 'distant footsteps on a metal staircase', 'sharp deep cinematic hit'" },
+            },
+          },
+        },
+      },
+    },
     escenas: { type: "array", items: { type: "string" }, description: "6 descripciones visuales EN INGLÉS para un generador de imágenes, una por momento de la historia, en orden. Concretas (lugar, encuadre, luz, qué se ve), mismo personaje y ambientación en todas, sin texto en pantalla, sin gore" },
     descripcion: { type: "string" },
     tags: { type: "array", items: { type: "string" } },
@@ -43,6 +68,16 @@ export async function run(idea, notasGerente = "", aprendizajes = "") {
       textoGancho: "NO LO HAGAS",
       titulo: idea.tema,
       narracion,
+      narracionActuada: narracion,
+      sonido: {
+        musica: "low cello drone, sparse detuned music box, slow heartbeat pulse, builds tension and stops before the twist",
+        efectos: [
+          { frase: narracion.split(/\s+/).slice(0, 2).join(" "), descripcion: "deep cinematic hit with reverb tail" },
+          { frase: narracion.split(/\s+/).slice(Math.floor(narracion.split(/\s+/).length * 0.45), Math.floor(narracion.split(/\s+/).length * 0.45) + 2).join(" "), descripcion: "slow footsteps on old wooden floor" },
+          { frase: narracion.split(/\s+/).slice(-12, -10).join(" "), descripcion: "eerie whisper close to the ear" },
+          { frase: narracion.split(/\s+/).slice(-5, -3).join(" "), descripcion: "rising horror swell" },
+        ],
+      },
       escenas: ["empty dark hallway at night, flickering light", "close-up of a hand on an old door handle", "shadowy silhouette at the end of a corridor", "old handwritten note taped to a window", "dark window with something pale behind the glass", "pitch black room, faint eyes"],
       descripcion: `${idea.gancho}\nHistoria de ficción original. Sígueme para una nueva cada noche. #terror #historiasdeterror #shorts`,
       tags: ["terror", "historias de terror", "creepypasta", "shorts", "miedo"],
@@ -64,6 +99,8 @@ FÓRMULA (obligatoria):
 • 10-40 s · ESCALADA: cada 5-8 s un detalle nuevo más inquietante que el anterior. Frases de 3-10 palabras. Detalles sensoriales concretos (sonidos, horas exactas, objetos).
 • 40-50 s · GIRO: la revelación recontextualiza todo lo anterior.
 • Última frase · BUCLE: debe conectar con la primera frase para que, al reiniciarse el Short, se sienta como continuación. Esto multiplica las re-vistas.
+
+SONIDO: diseña la música (que deje espacio a la voz y crezca hacia el giro) y 3-5 efectos en los momentos clave; justo antes del giro va bien un silencio o un golpe grave. En narracionActuada añade etiquetas de actuación sin cambiar ninguna palabra.
 
 Además: escribe 5 ganchos alternativos con técnicas distintas, elige el más fuerte y empieza la narración exactamente con él. El título NO repite el gancho: añade otra capa de curiosidad. 120-150 palabras. Sin gore explícito, sin personas/lugares/crímenes reales, nada dirigido a niños. Cada historia debe sentirse distinta a las anteriores.`,
     prompt: `Tema: ${idea.tema}
